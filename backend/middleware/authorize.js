@@ -10,6 +10,7 @@ const authorize = (allowedRoles) =>{
         next()
     }
 }
+
 export{
     authorize
 }
