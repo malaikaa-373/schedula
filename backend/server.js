@@ -4,6 +4,8 @@ import cors from "cors"
 import mongoose from "mongoose";
 import { router as authRoutes } from "./routes/authRoutes.js"
 import {Router} from "express"
+import { router as businessRoutes } from "./routes/businessRoutes.js"
+import { router as serviceRoutes } from "./routes/serviceRoutes.js"
 
 dotenv.config()
 
@@ -14,7 +16,8 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/auth", authRoutes)
-app.use("/api/business" , Router)
+app.use("/api/business" , businessRoutes)
+app.use("/api/service" , serviceRoutes)
 
 app.get('/', (req, res) => {
   res.json({ message: 'Server is running' });
