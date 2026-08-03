@@ -111,9 +111,9 @@ const deactivatStaff = async (req, res) => {
             {
                 new: true,
             })
-            .select("-password")    
+            .select("-password")
 
-            if (!staff)
+        if (!staff)
             return res
                 .status(404)
                 .json({ success: false, message: "Staff can't deactivate" })
@@ -130,9 +130,52 @@ const deactivatStaff = async (req, res) => {
     }
 }
 
-export{
+const updateAvailability = async (req, res) => {
+    try {
+        const { id } = req.params
+        const { availability, bufferTime } = req.body
+
+        if (!availability && bufferTime)
+            return res
+                .status(400)
+                .json({ success: false, message: "Availability and buffer time is required" })
+
+        const updates = {}
+        if (availability) updates.availability = availability
+        if (bufferTime !== undefined) updates.bufferTime = bufferTime
+
+        const staff = await User.findByIdAndUpdate(
+            // fiter by id and businessId to prevent change in business by other (Security)
+            {
+                _id: id, businessId: req.user.businessId
+            },
+            updates,
+            {
+                new: true,
+                runValidators: true,
+            })
+            .select("-password")
+
+        if (!staff)
+            return res
+                .status(404)
+                .json({ success: false, message: "Availability can't update" })
+
+        return res
+            .status(200)
+            .json({ success: true, message: "Availability updated successfully", staff })
+
+    } catch (error) {
+        return res
+            .status(500)
+            .json({ success: false, message: "Something went wrong", error: error.message })
+    }
+}
+
+export {
     addStaff,
     getStaff,
     updateStaff,
-    deactivatStaff
+    deactivatStaff,
+    updateAvailability
 }
