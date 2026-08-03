@@ -33,52 +33,52 @@ const userSchema = new mongoose.Schema({
         }
     },
     availability: {
-        monday: {
-            isWorking: { type: Boolean, default: false },
-            start: { type: String, default: null },
-            end: { type: String, default: null }
-        },
-        tuesday: {
-            isWorking: { type: Boolean, default: false },
-            start: { type: String, default: null },
-            end: { type: String, default: null }
-        },
-        wednesday: {
-            isWorking: { type: Boolean, default: false },
-
-            start: { type: String, default: null },
-            end: { type: String, default: null }
-        },
-        thursday: {
-            isWorking: { type: Boolean, default: false },
-
-            start: { type: String, default: null },
-            end: { type: String, default: null }
-        },
-        friday: {
-            isWorking: { type: Boolean, default: false },
-
-            start: { type: String, default: null },
-            end: { type: String, default: null }
-        },
-        saturday: {
-            isWorking: { type: Boolean, default: false },
-
-            start: { type: String, default: null },
-            end: { type: String, default: null }
-        },
-        sunday: {
-            isWorking: { type: Boolean, default: false },
-
-            start: { type: String, default: null },
-            end: { type: String, default: null }
-        },
+       monday: {
+        isWorking: { type: Boolean, default: true },
+        start: { type: String, default: "09:00" },
+        end: { type: String, default: "17:00" }
     },
-    isActive:{
-        type:Boolean,
-        default:true
-    }
-}, {
+    tuesday: {
+        isWorking: { type: Boolean, default: true },
+        start: { type: String, default: "09:00" },
+        end: { type: String, default: "17:00" }
+    },
+    wednesday: {
+        isWorking: { type: Boolean, default: true },
+        start: { type: String, default: "09:00" },
+        end: { type: String, default: "17:00" }
+    },
+    thursday: {
+        isWorking: { type: Boolean, default: true },
+        start: { type: String, default: "09:00" },
+        end: { type: String, default: "17:00" }
+    },
+    friday: {
+        isWorking: { type: Boolean, default: true },
+        start: { type: String, default: "09:00" },
+        end: { type: String, default: "17:00" }
+    },
+    saturday: {
+        isWorking: { type: Boolean, default: false },
+        start: { type: String, default: null },
+        end: { type: String, default: null }
+    },
+    sunday: {
+        isWorking: { type: Boolean, default: false },
+        start: { type: String, default: null },
+        end: { type: String, default: null }
+    },
+},
+    bufferTime: {
+    type: Number,
+    default: 0
+},
+    isActive: {
+    type: Boolean,
+    default: true
+},
+},
+{
     timestamps: true
 })
 
