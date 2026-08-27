@@ -1,14 +1,16 @@
-import {Router} from  "express"
-import { createBusiness } from "../controllers/bussinessController.js"
-import { login } from "../controllers/authController.js"
+import { Router } from "express";
+import { 
+    signup, 
+    login, 
+    logout, 
+    refreshAccessToken 
+} from "../controllers/authController.js";
 
-const router = Router()
+const router = Router();
 
-router.post("/signup", createBusiness)
+router.post("/signup", signup);
+router.post("/login", login);
+router.post("/logout", logout);
+router.post("/refresh-token", refreshAccessToken);
 
-router.post("/login" , login)
-
-
-export {
-    router
-}
+export default router;
