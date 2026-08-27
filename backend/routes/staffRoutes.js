@@ -5,6 +5,7 @@ import { authorize } from "../middleware/authorize.js";
 
 const router = Router()
 
+
 router.post("/", auth, authorize(["admin"]), addStaff)
 router.put("/:id", auth, authorize(["admin"]), updateStaff)
 router.get("/", auth, getStaff)
