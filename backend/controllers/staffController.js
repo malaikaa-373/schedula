@@ -135,7 +135,7 @@ const updateAvailability = async (req, res) => {
         const { id } = req.params
         const { availability, bufferTime } = req.body
 
-        if (!availability && bufferTime)
+        if (!availability && bufferTime == undefined)
             return res
                 .status(400)
                 .json({ success: false, message: "Availability and buffer time is required" })
@@ -144,7 +144,7 @@ const updateAvailability = async (req, res) => {
         if (availability) updates.availability = availability
         if (bufferTime !== undefined) updates.bufferTime = bufferTime
 
-        const staff = await User.findByIdAndUpdate(
+        const staff = await User.findOneAndUpdate(
             // fiter by id and businessId to prevent change in business by other (Security)
             {
                 _id: id, businessId: req.user.businessId
