@@ -77,6 +77,18 @@ const userSchema = new mongoose.Schema({
         end: { type: String, default: null }
     },
 },
+inviteToken: {
+    type: String,
+    default: null,
+},
+inviteExpiry: {
+    type: Date,
+    default: null,
+},
+isVerified: {
+    type: Boolean,
+    default: false,
+},
     bufferTime: {
     type: Number,
     default: 0
