@@ -49,6 +49,14 @@ const bookingSchema = new mongoose.Schema({
         type: String,
         enum: ["dashboard", "embed"]
     },
+  reminderSent24hr: {
+    type: Boolean,
+    default: false
+},
+reminderSent1hr: {
+    type: Boolean,
+    default: false
+}
 }, {
     timestamps: true
 })

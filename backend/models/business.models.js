@@ -58,8 +58,15 @@ const businessSchema = new mongoose.Schema({
         enum: ["free", "pro", "business"],
         default: "free"
     },
+    subscriptionStatus: {
+        type: String,
+        enum: ["active", "cancelled", "expired"],
+        default: "active"
+    },
     stripeCustomerId: {
         type: String,
+        default: null
+
     },
     status: {
         type: String,
