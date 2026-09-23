@@ -3,6 +3,7 @@ import { User } from "../models/user.models.js";
 import { Service } from "../models/services.models.js"
 import { toUTC, toLocal } from "../utils/timezone.js";
 import { format, getDay, addMinutes, isBefore, areIntervalsOverlapping } from "date-fns"
+import { io } from "../server.js"
 
 const createBooking = async (req, res) => {
     try {
@@ -12,7 +13,6 @@ const createBooking = async (req, res) => {
             return res
                 .status(400)
                 .json({ success: false, message: "All credentails are required" })
-
         }
 
         const utcStartTime = toUTC(startTime)
@@ -29,15 +29,23 @@ const createBooking = async (req, res) => {
                 .status(409)
                 .json({ success: false, message: "Booking Slot isn't free" })
         }
+
         const newBooking = await Booking.create({
             serviceId: serviceId,
             staffId: staffId,
             clientEmail: clientEmail,
             clientName: clientName,
-            startTime: startTime,
-            endTime: endTime,
+            startTime: utcStartTime,
+            endTime: utcEndTime,
             source: "dashboard",
             businessId: req.user.businessId
+        })
+
+        io.to(`business:${newBooking.businessId}`).emit("booking:created", newBooking)
+
+        io.to(`business:${newBooking.businessId}`).emit("notification:new", {
+            type: "booking_created",
+            message: `New booking from ${clientName}`
         })
 
         return res
@@ -53,34 +61,40 @@ const createBooking = async (req, res) => {
 
 const getBookings = async (req, res) => {
     try {
-        const { staffId, startDate, endDate } = req.query
-        const filter = { businessId: req.user.businessId }
+        const { staffId, startDate, endDate } = req.query;
+        const filter = { businessId: req.user.businessId };
 
-        if (req.user.role === 'staff') {
-            filter.staffId = req.user._id
-        } else if (req.user.role === 'admin') {
-            if (staffId) filter.staffId = staffId
+        if (req.user.role === "staff") {
+            // ✅ Staff — sirf apni bookings
+            filter.staffId = req.user._id;
+        } else if (req.user.role === "admin" || req.user.role === "superadmin") {
+            // ✅ Admin + Superadmin — staffId query se filter
+            if (staffId) filter.staffId = staffId;
         }
 
+        // ✅ Date range filter
         if (startDate && endDate) {
             filter.startTime = {
                 $gte: toUTC(`${startDate} 00:00`),
-                $lte: toUTC(`${endDate} 23:59`)
-            }
+                $lte: toUTC(`${endDate} 23:59`),
+            };
         }
 
-        const newBookings = await Booking.find(filter)
+        const newBookings = await Booking.find(filter);
 
-        return res
-            .status(200)
-            .json({ success: true, booking: newBookings })
+        return res.status(200).json({
+            success: true,
+            booking: newBookings,
+        });
 
     } catch (error) {
-        return res
-            .status(500)
-            .json({ success: false, message: "Something went wrong", error: error.message })
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong",
+            error: error.message,
+        });
     }
-}
+};
 
 const updateBookingStatus = async (req, res) => {
     try {
@@ -108,6 +122,14 @@ const updateBookingStatus = async (req, res) => {
             return res
                 .status(404)
                 .json({ success: false, message: "Booking not found" })
+
+        console.log(" Emitting booking:updated event");
+        io.to(`business:${booking.businessId}`).emit("booking:updated", {
+            bookingId: booking._id,
+            newStatus: status,
+            clientName: booking.clientName
+        });
+
 
         return res
             .status(200)
@@ -260,10 +282,54 @@ const getAvailableSlots = async (req, res) => {
     }
 }
 
+const cancelBooking = async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { reason } = req.body;
+
+        const booking = await Booking.findOneAndUpdate(
+            { _id: id, businessId: req.user.businessId },
+            { status: "cancelled" },
+            { new: true, runValidators: true }
+        );
+
+        if (!booking) {
+            return res.status(404).json({ success: false, message: "Booking not found" });
+        }
+
+        console.log("Emitting booking:cancelled event");
+        io.to(`business:${booking.businessId}`).emit("booking:cancelled", {
+            bookingId: booking._id,
+            clientName: booking.clientName,
+            reason: reason || "No reason provided",
+            cancelledAt: new Date()
+        });
+
+        io.to(`business:${booking.businessId}`).emit("notification:new", {
+            type: "booking_cancelled",
+            message: `Booking cancelled for ${booking.clientName}`
+        })
+        
+        return res.status(200).json({
+            success: true,
+            message: "Booking cancelled successfully",
+            booking
+        });
+
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong",
+            error: error.message
+        });
+    }
+}
+
 export {
     createBooking,
     getBookings,
     updateBookingStatus,
     rescheduleBooking,
-    getAvailableSlots
+    getAvailableSlots,
+    cancelBooking
 }

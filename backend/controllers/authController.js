@@ -7,18 +7,28 @@ export const signup = async (req, res) => {
 
         // Validation
         if (!name || !email || !password) {
-            return res.status(400).json({ 
+            return res.status(400).json({
                 success: false,
-                message: "All fields are required" 
+                message: "All fields are required"
             });
         }
+
+        // ✅ Password Strength Validation 
+const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_\-+=])[A-Za-z\d@$!%*?&#^()_\-+=]{8,}$/;
+
+if (!passwordRegex.test(password)) {
+    return res.status(400).json({
+        success: false,
+        message: "Password must contain at least 8 characters, 1 uppercase, 1 lowercase, 1 number, and 1 special character"
+    });
+}
 
         // Check if user already exists
         const existingUser = await User.findOne({ email });
         if (existingUser) {
-            return res.status(409).json({ 
+            return res.status(409).json({
                 success: false,
-                message: "Email already registered" 
+                message: "Email already registered"
             });
         }
 

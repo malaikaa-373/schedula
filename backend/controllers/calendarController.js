@@ -4,6 +4,7 @@ import { Business } from "../models/business.models.js"
 import { Service } from "../models/services.models.js"
 import { Booking } from "../models/booking.models.js"
 import { toUTC } from "../utils/timezone.js"
+import { io } from "../server.js";
 
 const createCalendar = async (req, res) => {
     try {
@@ -67,6 +68,7 @@ const getPublicCalendar = async (req, res) => {
 }
 
 const createPublicBooking = async (req, res) => {
+    console.log("public booking function called");
     try {
         const {
             embedId,
@@ -126,6 +128,9 @@ const createPublicBooking = async (req, res) => {
             businessId: calendar.businessId
         })
 
+        console.log("Emitting to room:", `business:${calendar.businessId}`);
+        io.to(`business:${calendar.businessId}`).emit("booking:created", newBooking);
+
         return res
             .status(201)
             .json({ success: true, message: "Booking created successfully", booking: newBooking })
@@ -169,9 +174,27 @@ const getAvailableSlots = async (req, res) => {
     }
 }
 
+const getCalendars = async (req, res) => {
+    try {
+        const calendars = await Calendar.find({
+            businessId: req.user.businessId,
+        });
+        return res.status(200).json({
+            success: true,
+            calendars,
+        });
+    } catch (error) {
+        return res.status(500).json({
+            success: false,
+            message: "Something went wrong",
+            error: error.message,
+        });
+    }
+};
 export {
     createCalendar,
     getPublicCalendar,
     createPublicBooking,
-    getAvailableSlots
+    getAvailableSlots,
+    getCalendars
 }
