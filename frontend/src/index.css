@@ -109,3 +109,41 @@ code {
   padding: 4px 8px;
   background: var(--code-bg);
 }
+
+/* ============= RESPONSIVE FIX ============= */
+
+#root {
+  width: 100% !important;
+  max-width: 100% !important;
+  text-align: left !important;
+  border-inline: none !important;
+}
+
+/* Mobile — 768px se chhoti screen */
+@media (max-width: 768px) {
+  /* Hamburger button dikhao */
+  .hamburger-btn {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Sidebar mobile pe slide ho jaye */
+  .sidebar {
+    transform: translateX(-100%);
+  }
+
+  .sidebar.sidebar-open {
+    transform: translateX(0);
+  }
+
+  /* Main area se margin hatao */
+  .main-area {
+    margin-left: 0 !important;
+  }
+
+  /* Content padding chhoti karo */
+  .main-area main {
+    padding: 16px !important;
+  }
+}

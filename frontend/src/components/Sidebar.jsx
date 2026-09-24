@@ -1,14 +1,13 @@
-// ✅ Sidebar — Dashboard ka left menu
+// ✅ Sidebar — Dashboard ka left menu (Mobile Responsive)
 
 import { NavLink, useNavigate } from "react-router-dom";
 import useAuthStore from "../store/authStore";
 import toast from "react-hot-toast";
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
     const navigate = useNavigate();
     const { user, logout } = useAuthStore();
 
-    // ✅ Menu Items — Sidebar ke links
     const menuItems = [
         { name: "Dashboard", path: "/dashboard", icon: "📊" },
         { name: "Bookings", path: "/bookings", icon: "📅" },
@@ -20,59 +19,80 @@ const Sidebar = () => {
         { name: "Designer", path: "/calendar-designer", icon: "🎨" },
     ];
 
-    // ✅ Logout Function
     const handleLogout = () => {
-        logout();                          // Token clear karo
-        toast.success("Logged out!");      // Toast dikhao
-        navigate("/");                     // Login page pe bhejo
+        logout();
+        toast.success("Logged out!");
+        navigate("/");
+    };
+
+    // NavLink click hone pe mobile pe sidebar band karo
+    const handleNavClick = () => {
+        if (window.innerWidth <= 768 && onClose) onClose();
     };
 
     return (
-        <div style={styles.sidebar}>
-            {/* ✅ Logo Section */}
-            <div style={styles.logo}>
-                <h2 style={styles.logoText}>📅 Schedula</h2>
-            </div>
+        <>
+            {/* Mobile overlay — jab sidebar khula ho */}
+            {isOpen && (
+                <div
+                    onClick={onClose}
+                    style={styles.overlay}
+                    className="sidebar-overlay"
+                />
+            )}
 
-            {/* ✅ Menu Links */}
-            <nav style={styles.nav}>
-                {menuItems.map((item) => (
-                    <NavLink
-                        key={item.path}
-                        to={item.path}
-                        style={({ isActive }) => ({
-                            ...styles.navLink,
-                            ...(isActive ? styles.navLinkActive : {}),
-                        })}
-                    >
-                        <span style={styles.icon}>{item.icon}</span>
-                        <span>{item.name}</span>
-                    </NavLink>
-                ))}
-            </nav>
-
-            {/* ✅ User Info + Logout */}
-            <div style={styles.bottomSection}>
-                <div style={styles.userInfo}>
-                    <div style={styles.avatar}>
-                        {user?.name?.charAt(0)?.toUpperCase() || "A"}
-                    </div>
-                    <div>
-                        <p style={styles.userName}>{user?.name || "Admin"}</p>
-                        <p style={styles.userRole}>{user?.role || "admin"}</p>
-                    </div>
+            <div
+                style={styles.sidebar}
+                className={`sidebar ${isOpen ? "sidebar-open" : ""}`}
+            >
+                <div style={styles.logo}>
+                    <h2 style={styles.logoText}>📅 Schedula</h2>
                 </div>
 
-                <button onClick={handleLogout} style={styles.logoutBtn}>
-                    🚪 Logout
-                </button>
+                <nav style={styles.nav}>
+                    {menuItems.map((item) => (
+                        <NavLink
+                            key={item.path}
+                            to={item.path}
+                            onClick={handleNavClick}
+                            style={({ isActive }) => ({
+                                ...styles.navLink,
+                                ...(isActive ? styles.navLinkActive : {}),
+                            })}
+                        >
+                            <span style={styles.icon}>{item.icon}</span>
+                            <span>{item.name}</span>
+                        </NavLink>
+                    ))}
+                </nav>
+
+                <div style={styles.bottomSection}>
+                    <div style={styles.userInfo}>
+                        <div style={styles.avatar}>
+                            {user?.name?.charAt(0)?.toUpperCase() || "A"}
+                        </div>
+                        <div>
+                            <p style={styles.userName}>{user?.name || "Admin"}</p>
+                            <p style={styles.userRole}>{user?.role || "admin"}</p>
+                        </div>
+                    </div>
+
+                    <button onClick={handleLogout} style={styles.logoutBtn}>
+                        🚪 Logout
+                    </button>
+                </div>
             </div>
-        </div>
+        </>
     );
 };
 
-// ✅ Styles
 const styles = {
+    overlay: {
+        position: "fixed",
+        inset: 0,
+        backgroundColor: "rgba(0,0,0,0.5)",
+        zIndex: 998,
+    },
     sidebar: {
         width: "260px",
         height: "100vh",
@@ -83,6 +103,8 @@ const styles = {
         top: 0,
         display: "flex",
         flexDirection: "column",
+        zIndex: 999,
+        transition: "transform 0.3s ease",
     },
     logo: {
         padding: "24px 20px",
@@ -99,6 +121,7 @@ const styles = {
         padding: "16px 0",
         display: "flex",
         flexDirection: "column",
+        overflowY: "auto",
     },
     navLink: {
         display: "flex",

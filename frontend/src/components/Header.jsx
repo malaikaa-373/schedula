@@ -1,54 +1,55 @@
-// ✅ Header — Dashboard ka top bar (Welcome + Notification Bell)
+// ✅ Header — Dashboard top bar (Mobile Responsive)
 
 import { useState } from "react";
 import useAuthStore from "../store/authStore";
 import useNotificationStore from "../store/notifications";
 
-const Header = () => {
+const Header = ({ onMenuClick }) => {
     const { user } = useAuthStore();
     const { notifications, markAsRead } = useNotificationStore();
-
-    // ✅ Notification dropdown open/close karne ke liye state
     const [showNotifications, setShowNotifications] = useState(false);
-
-    // ✅ Unread notifications ka count
     const unreadCount = notifications?.filter((n) => !n.isRead).length || 0;
 
     return (
         <div style={styles.header}>
-            {/* ✅ LEFT: Welcome Message */}
-            <div>
-                <h2 style={styles.title}>
-                    Welcome, {user?.name || "Admin"} 👋
-                </h2>
-                <p style={styles.subtitle}>
-                    Here's what's happening with your business today.
-                </p>
+            <div style={styles.leftSection}>
+                {/* ✅ Hamburger — mobile pe dikhe */}
+                <button
+                    style={styles.hamburger}
+                    onClick={onMenuClick}
+                    className="hamburger-btn"
+                >
+                    ☰
+                </button>
+
+                <div>
+                    <h2 style={styles.title}>
+                        Welcome, {user?.name || "Admin"} 👋
+                    </h2>
+                    <p style={styles.subtitle}>
+                        Here's what's happening today.
+                    </p>
+                </div>
             </div>
 
-            {/* ✅ RIGHT: Notification Bell */}
             <div style={styles.rightSection}>
                 <div style={styles.bellWrapper}>
-                    {/* Bell Button */}
                     <button
                         style={styles.bellBtn}
                         onClick={() => setShowNotifications(!showNotifications)}
                     >
                         🔔
-                        {/* ✅ Agar unread hain toh badge dikhao */}
                         {unreadCount > 0 && (
                             <span style={styles.badge}>{unreadCount}</span>
                         )}
                     </button>
 
-                    {/* ✅ Dropdown — jab bell click ho */}
                     {showNotifications && (
                         <div style={styles.dropdown}>
                             <div style={styles.dropdownHeader}>
                                 <h4 style={styles.dropdownTitle}>Notifications</h4>
                             </div>
 
-                            {/* Agar notifications hain toh list dikhao */}
                             {notifications?.length > 0 ? (
                                 notifications.slice(0, 5).map((notif) => (
                                     <div
@@ -80,25 +81,45 @@ const Header = () => {
     );
 };
 
-// ✅ Styles
 const styles = {
     header: {
         display: "flex",
         justifyContent: "space-between",
         alignItems: "center",
-        padding: "20px 30px",
+        padding: "16px 20px",
         backgroundColor: "#ffffff",
         borderBottom: "1px solid #e2e8f0",
+        gap: "12px",
+        flexWrap: "wrap",
+    },
+    leftSection: {
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        flex: 1,
+        minWidth: 0,
+    },
+    hamburger: {
+        display: "none",
+        backgroundColor: "#1e293b",
+        color: "#ffffff",
+        border: "none",
+        borderRadius: "8px",
+        width: "40px",
+        height: "40px",
+        fontSize: "20px",
+        cursor: "pointer",
+        flexShrink: 0,
     },
     title: {
         margin: 0,
-        fontSize: "22px",
+        fontSize: "20px",
         fontWeight: "700",
         color: "#1e293b",
     },
     subtitle: {
         margin: "4px 0 0 0",
-        fontSize: "14px",
+        fontSize: "13px",
         color: "#64748b",
     },
     rightSection: {
@@ -130,12 +151,16 @@ const styles = {
         height: "20px",
         fontSize: "11px",
         fontWeight: "700",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
     },
     dropdown: {
         position: "absolute",
         top: "54px",
         right: 0,
         width: "320px",
+        maxWidth: "90vw",
         backgroundColor: "#ffffff",
         borderRadius: "10px",
         boxShadow: "0 10px 30px rgba(0,0,0,0.15)",
