@@ -19,7 +19,7 @@ import Subscription from "./pages/Subscription";
 import CalendarDesigner from "./pages/CalendarDesign";
 
 function App() {
-  const socket = useSocket("http://localhost:5000");
+  const socket = useSocket(import.meta.env.VITE_SOCKET_URL)
   useBookingEvents(socket);
   const { notifications, unreadCount, markAllRead } = useNotifications(socket);
 
@@ -68,8 +68,8 @@ function App() {
         <Route path="/bookings" element={<ProtectedRoute><Bookings /> </ProtectedRoute>} />
         <Route path="/embed-code" element={<ProtectedRoute><EmbedCode /> </ProtectedRoute>} />
         <Route path="/super-admin" element={<SuperAdmin />} />
-        <Route path="/calendar-designer" element={<ProtectedRoute><CalendarDesigner/> </ProtectedRoute>} />
-      
+        <Route path="/calendar-designer" element={<ProtectedRoute><CalendarDesigner /> </ProtectedRoute>} />
+
       </Routes>
     </>
   );
