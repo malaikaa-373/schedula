@@ -2,7 +2,7 @@ import dotenv from "dotenv";
 dotenv.config();   // ✅ SAB SE PEHLE
 
 import Stripe from "stripe";
- 
+
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY);
 
 const createCheckoutSession = async (req, res) => {
@@ -15,8 +15,9 @@ const createCheckoutSession = async (req, res) => {
                 }
             ],
             mode: "subscription",
-            success_url: "http://localhost:5173/dashboard?payment=success",
-            cancel_url: "http://localhost:5173/dashboard?payment=cancelled",
+            success_url: `${process.env.CLIENT_URL}/dashboard?success=true`,
+            cancel_url: `${process.env.CLIENT_URL}/dashboard?canceled=true`,
+            return_url: `${process.env.CLIENT_URL}/subscription`,
             client_reference_id: req.user.businessId.toString()
         });
 

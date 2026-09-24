@@ -4,7 +4,7 @@ import cors from "cors";
 import mongoose from "mongoose";
 import http from "http";
 import { Server as SocketServer } from "socket.io";
-import jwt from "jsonwebtoken"; 
+import jwt from "jsonwebtoken";
 import jobs from "./jobs/reminderSender.js";
 // Routes
 import authRoutes from "./routes/authRoutes.js";
@@ -33,7 +33,10 @@ const server = http.createServer(app);
 
 const io = new SocketServer(server, {
     cors: {
-        origin: "http://localhost:5173",
+        origin: [
+            "http://localhost:5173",
+            "https://schedula-frontend-ruby.vercel.app"
+        ],
         methods: ["GET", "POST"],
     },
 });
@@ -134,5 +137,5 @@ if (process.env.NODE_ENV !== "test") {
     });
 }
 
-export {io};
+export { io };
 export default app;  
