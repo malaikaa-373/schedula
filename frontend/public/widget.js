@@ -3,8 +3,8 @@ const scriptTag = document.currentScript
 const calendarId = scriptTag.getAttribute("data-calendar-id")
 
 const iframe = document.createElement("iframe")
-//http:localhost:5173 will be replaced later 
-iframe.src = `http://localhost:5173/embed/${calendarId}`
+
+iframe.src = `https://schedula-frontend-ruby.vercel.app/embed/${businessId}/${calendarId}`;
 iframe.style.width = "100%"
 iframe.style.height = "600px"
 iframe.style.border = "none"

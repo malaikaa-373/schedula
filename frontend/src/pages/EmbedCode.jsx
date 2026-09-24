@@ -43,7 +43,7 @@ const EmbedCode = () => {
         if (!selectedCalendar) return "";
 
         return `<script 
-    src="http://localhost:5173/widget.js" 
+src="https://schedula-frontend-ruby.vercel.app/widget.js"
     data-calendar-id="${selectedCalendar.embedId}"
 ></script>`;
     };

@@ -41,7 +41,7 @@ const CalendarDesigner = () => {
 
     // ✅ Copy Embed Code
     const handleCopyCode = () => {
-        const code = `<script src="http://localhost:5173/widget.js" data-calendar-id="${embedId}"></script>`;
+        const code = `<script src="https://schedula-frontend-ruby.vercel.app/widget.js" data-calendar-id="${embedId}"></script>`;
         navigator.clipboard.writeText(code);
         toast.success("Embed code copied!");
     };
@@ -125,7 +125,7 @@ const CalendarDesigner = () => {
                             <p style={styles.embedLabel}>✅ Your Embed Code:</p>
                             <textarea
                                 readOnly
-                                value={`<script src="http://localhost:5173/widget.js" data-calendar-id="${embedId}"></script>`}
+                               value={`<script src="https://schedula-frontend-ruby.vercel.app/widget.js" data-calendar-id="${embedId}"></script>`}
                                 style={styles.embedCode}
                             />
                             <button onClick={handleCopyCode} style={styles.copyBtn}>
