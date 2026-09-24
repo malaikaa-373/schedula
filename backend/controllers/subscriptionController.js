@@ -17,7 +17,6 @@ const createCheckoutSession = async (req, res) => {
             mode: "subscription",
             success_url: `${process.env.CLIENT_URL}/dashboard?success=true`,
             cancel_url: `${process.env.CLIENT_URL}/dashboard?canceled=true`,
-            return_url: `${process.env.CLIENT_URL}/subscription`,
             client_reference_id: req.user.businessId.toString()
         });
 
