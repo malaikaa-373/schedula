@@ -167,17 +167,15 @@ const getAvailableSlots = async (req, res) => {
             return res.status(404).json({ success: false, message: "Service not found" });
         }
 
-        // 2. Staff fetch karo (availability ke liye)
+        // 2. Staff fetch karo
         const staff = await User.findById(staffId);
         if (!staff) {
             return res.status(404).json({ success: false, message: "Staff not found" });
         }
 
-        // 3. Us din ki existing bookings fetch karo
-        const startOfDay = new Date(date);
-        startOfDay.setHours(0, 0, 0, 0);
-        const endOfDay = new Date(date);
-        endOfDay.setHours(23, 59, 59, 999);
+        // 3. Us din ki existing bookings fetch karo — UTC range
+        const startOfDay = toUTC(`${date}T00:00:00`);
+        const endOfDay = toUTC(`${date}T23:59:59`);
 
         const existingBookings = await Booking.find({
             staffId: staffId,
@@ -185,35 +183,29 @@ const getAvailableSlots = async (req, res) => {
             status: { $ne: "cancelled" }
         });
 
-        // 4. Staff ki working hours lo (default 9 AM – 6 PM)
-        const workStart = 9;   // 9 AM
-        const workEnd = 18;    // 6 PM
-        const slotDuration = service.duration || 30;  // minutes
+        // 4. Working hours (PKT)
+        const workStart = 9;   // 9 AM PKT
+        const workEnd = 18;    // 6 PM PKT
+        const slotDuration = service.duration || 30;
 
-        // 5. Available slots generate karo
+        // 5. Available slots generate karo — UTC mein compare
         const availableSlots = [];
-        const dateObj = new Date(date);
 
         for (let hour = workStart; hour < workEnd; hour++) {
             for (let min = 0; min < 60; min += slotDuration) {
-                const slotStart = new Date(dateObj);
-                slotStart.setHours(hour, min, 0, 0);
+                const slotTimeStr = `${String(hour).padStart(2, "0")}:${String(min).padStart(2, "0")}`;
+                const slotStart = toUTC(`${date}T${slotTimeStr}:00`);
+                const slotEnd = new Date(slotStart.getTime() + slotDuration * 60000);
 
-                const slotEnd = new Date(slotStart);
-                slotEnd.setMinutes(slotEnd.getMinutes() + slotDuration);
-
-                // Check karo ke ye slot kisi existing booking se overlap to nahi karta
+                // Conflict check — UTC mein
                 const hasConflict = existingBookings.some((b) => {
                     const bStart = new Date(b.startTime);
                     const bEnd = new Date(b.endTime);
                     return slotStart < bEnd && slotEnd > bStart;
                 });
 
-                // Agar conflict nahi, to slot add karo
                 if (!hasConflict) {
-                    availableSlots.push(
-                        `${String(hour).padStart(2, "0")}:${String(min).padStart(2, "0")}`
-                    );
+                    availableSlots.push(slotTimeStr);
                 }
             }
         }
