@@ -70,8 +70,8 @@ const Signup = () => {
             const { user, accessToken } = response.data.data;
 
             // ✅ Auth store mein set karo
-            useAuthStore.getState().setAuth(user, accessToken);
-
+            useAuthStore.getState().login(user, accessToken);
+            
             toast.success("Business created successfully!");
             navigate("/dashboard");
         } catch (error) {
