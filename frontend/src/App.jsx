@@ -55,6 +55,7 @@ function App() {
 
       <Routes>
         <Route path="/" element={<Login />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/embed/:embedId" element={<PublicBooking />} />
         <Route path="/dashboard" element={<ProtectedRoute><Dashboard
           notifications={notifications} unreadCount={unreadCount} markAllRead={markAllRead}

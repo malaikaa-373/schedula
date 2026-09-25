@@ -18,39 +18,27 @@ const Signup = () => {
     const [error, setError] = useState("");
     const [passwordErrors, setPasswordErrors] = useState([]);
 
-    // ✅ Password validation function
+    // ✅ Password validation
     const validatePassword = (password) => {
         const errors = [];
 
-        if (password.length < 8) {
-            errors.push("Minimum 8 characters");
-        }
-        if (!/[A-Z]/.test(password)) {
-            errors.push("1 uppercase letter (A-Z)");
-        }
-        if (!/[a-z]/.test(password)) {
-            errors.push("1 lowercase letter (a-z)");
-        }
-        if (!/\d/.test(password)) {
-            errors.push("1 number (0-9)");
-        }
-        if (!/[@$!%*?&^#()_\-+=]/.test(password)) {
+        if (password.length < 8) errors.push("Minimum 8 characters");
+        if (!/[A-Z]/.test(password)) errors.push("1 uppercase letter (A-Z)");
+        if (!/[a-z]/.test(password)) errors.push("1 lowercase letter (a-z)");
+        if (!/\d/.test(password)) errors.push("1 number (0-9)");
+        if (!/[@$!%*?&^#()_\-+=]/.test(password))
             errors.push("1 special character (@$!%*?& etc.)");
-        }
 
         return errors;
     };
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-
         setFormData({ ...formData, [name]: value });
 
-        // ✅ Password field ke liye live validation
         if (name === "password") {
             setPasswordErrors(validatePassword(value));
         }
-
         if (error) setError("");
     };
 
@@ -58,7 +46,7 @@ const Signup = () => {
         e.preventDefault();
         setError("");
 
-        // ✅ Password validation check
+        // Password validation
         const pwdErrors = validatePassword(formData.password);
         if (pwdErrors.length > 0) {
             setPasswordErrors(pwdErrors);
@@ -69,14 +57,19 @@ const Signup = () => {
         setLoading(true);
 
         try {
+            // ✅ Backend ke according — 5 fields
             const response = await api.post("/auth/business-signup", {
                 businessName: formData.businessName,
-                name: formData.name,
+                ownerName: formData.name,             // "name" → "ownerName"
+                timezone: Intl.DateTimeFormat().resolvedOptions().timeZone,  // auto
                 email: formData.email,
                 password: formData.password,
             });
 
+            // ✅ Backend response structure match karo
             const { user, accessToken } = response.data.data;
+
+            // ✅ Auth store mein set karo
             useAuthStore.getState().setAuth(user, accessToken);
 
             toast.success("Business created successfully!");
@@ -103,10 +96,7 @@ const Signup = () => {
                 <h2 style={styles.title}>🏢 Create Your Business</h2>
                 <p style={styles.subtitle}>Start managing your bookings</p>
 
-                {/* ✅ Main error box */}
-                {error && (
-                    <div style={styles.errorBox}>❌ {error}</div>
-                )}
+                {error && <div style={styles.errorBox}>❌ {error}</div>}
 
                 <form onSubmit={handleSubmit} style={styles.form}>
                     <input
@@ -150,7 +140,6 @@ const Signup = () => {
                         minLength={8}
                     />
 
-                    {/* ✅ Password requirements — live */}
                     {formData.password && passwordErrors.length > 0 && (
                         <div style={styles.passwordErrorBox}>
                             <strong style={{ fontSize: "13px" }}>
@@ -171,7 +160,6 @@ const Signup = () => {
                         </div>
                     )}
 
-                    {/* ✅ Password requirements satisfied */}
                     {formData.password && passwordErrors.length === 0 && (
                         <div style={styles.passwordSuccessBox}>
                             ✅ Password is strong
