@@ -12,7 +12,7 @@ const Tasks = () => {
     // ✅ Tasks fetch karo
     const fetchTasks = async () => {
         try {
-            const response = await api.get("/task");
+            const response = await api.get("/tasks");
             const tasksData =
                 response.data.tasks ||
                 response.data.Tasks ||
@@ -34,7 +34,7 @@ const Tasks = () => {
     // ✅ Status update
     const handleStatusChange = async (taskId, newStatus) => {
         try {
-            await api.put(`/task/${taskId}/status`, { status: newStatus });
+            await api.put(`/tasks/${taskId}/status`, { status: newStatus });
             toast.success("Task updated");
             fetchTasks();
         } catch (error) {

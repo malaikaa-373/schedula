@@ -17,6 +17,7 @@ import EmbedCode from "./pages/EmbedCode.jsx";
 import SuperAdmin from "./pages/SuperAdmin";
 import Subscription from "./pages/Subscription";
 import CalendarDesigner from "./pages/CalendarDesign";
+import Tasks from "./pages/Task";
 
 function App() {
   const socket = useSocket(import.meta.env.VITE_SOCKET_URL)
@@ -69,6 +70,7 @@ function App() {
         <Route path="/embed-code" element={<ProtectedRoute><EmbedCode /> </ProtectedRoute>} />
         <Route path="/super-admin" element={<SuperAdmin />} />
         <Route path="/calendar-designer" element={<ProtectedRoute><CalendarDesigner /> </ProtectedRoute>} />
+        <Route path="/tasks" element={<ProtectedRoute><Tasks /></ProtectedRoute>} />
 
       </Routes>
     </>

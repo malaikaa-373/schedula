@@ -17,6 +17,7 @@ const Sidebar = ({ isOpen, onClose }) => {
         { name: "Embed Code", path: "/embed-code", icon: "🔗" },
         { name: "Subscription", path: "/subscription", icon: "💳" },
         { name: "Designer", path: "/calendar-designer", icon: "🎨" },
+        { name: "Tasks", path: "/tasks", icon: "📋" },
     ];
 
     const handleLogout = () => {

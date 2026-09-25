@@ -50,7 +50,7 @@ const AddTaskModal = ({ isOpen, onClose, onTaskAdded }) => {
         setLoading(true);
 
         try {
-            await api.post("/task", formData);
+            await api.post("/tasks", formData);
             toast.success("Task created successfully!");
             setFormData({
                 title: "",

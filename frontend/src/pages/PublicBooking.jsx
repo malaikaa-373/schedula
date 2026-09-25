@@ -39,7 +39,7 @@ const PublicBooking = () => {
     useEffect(() => {
         const fetchCalendar = async () => {
             try {
-                const response = await api.get(`/calendar/public/${embedId}`);
+const response = await api.get(`/public/calendar/${embedId}`);
                 setDesignConfig(response.data.designConfig);
                 setServices(response.data.services);
             } catch (error) {
@@ -55,7 +55,7 @@ const PublicBooking = () => {
         const fetchSlots = async () => {
             if (selectedStaff && selectedDate && selectedService) {
                 try {
-                    const response = await api.get("/calendar/public/available-slots", {
+                    const response = await api.get("/public/available-slots", {
                         params: {
                             embedId: embedId,
                             serviceId: selectedService._id,
@@ -93,7 +93,7 @@ const PublicBooking = () => {
             const endTime = new Date(startTime);
             endTime.setMinutes(endTime.getMinutes() + selectedService.duration);
 
-            await api.post("/calendar/public/bookings", {
+            await api.post("/public/bookings", {
                 embedId: embedId,
                 serviceId: selectedService._id,
                 staffId: selectedStaff,
