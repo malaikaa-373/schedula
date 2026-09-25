@@ -1,4 +1,4 @@
-# 🗓️ Schedula
+[# 🗓️ Schedula
 
 **A multi-tenant SaaS platform for booking, calendar, and task management.**
 
@@ -250,8 +250,8 @@ schedula/
 
 | Service | Platform | URL |
 |---------|----------|-----|
-| Frontend | Vercel | _coming soon_ |
-| Backend | Render | _coming soon_ |
+| Frontend | Vercel | https://schedula-frontend-ruby.vercel.app |
+| Backend | Render | https://schedula-production-1a26.up.railway.app |
 | Database | MongoDB Atlas | - |
 
 ---
@@ -296,4 +296,4 @@ MIT — free to use, learn from, and build upon.
 
 ## 🙏 Acknowledgements
 
-Built as part of an internship project under the guidance of **Faraz Ahmad**.
+Built as part of an internship project under the guidance of **Faraz Ahmad**.](https://github.com/malaikaa-373/schedula/blob/main/README.md)
