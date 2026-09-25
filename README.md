@@ -250,8 +250,8 @@ schedula/
 
 | Service | Platform | URL |
 |---------|----------|-----|
-| Frontend | Vercel | _coming soon_ |
-| Backend | Render | _coming soon_ |
+| Frontend | Vercel | https://schedula-frontend-ruby.vercel.app |
+| Backend | Render | https://schedula-production-1a26.up.railway.app |
 | Database | MongoDB Atlas | - |
 
 ---
