@@ -1,37 +1,97 @@
 import { useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
-import axios from "axios";
+import { Link, useNavigate } from "react-router-dom";
+import api from "../api/axios.js";
 import toast from "react-hot-toast";
+import useAuthStore from "../store/authStore";
 
 const Signup = () => {
-    const [formData, setFormData] = useState({
-        businessName: "",
-        ownerName: "",
-        email: "",
-        password: "",
-        timezone: "Asia/Karachi"
-    });
-    const [loading, setLoading] = useState(false);
     const navigate = useNavigate();
 
+    const [formData, setFormData] = useState({
+        businessName: "",
+        name: "",
+        email: "",
+        password: "",
+    });
+
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState("");
+    const [passwordErrors, setPasswordErrors] = useState([]);
+
+    // ✅ Password validation function
+    const validatePassword = (password) => {
+        const errors = [];
+
+        if (password.length < 8) {
+            errors.push("Minimum 8 characters");
+        }
+        if (!/[A-Z]/.test(password)) {
+            errors.push("1 uppercase letter (A-Z)");
+        }
+        if (!/[a-z]/.test(password)) {
+            errors.push("1 lowercase letter (a-z)");
+        }
+        if (!/\d/.test(password)) {
+            errors.push("1 number (0-9)");
+        }
+        if (!/[@$!%*?&^#()_\-+=]/.test(password)) {
+            errors.push("1 special character (@$!%*?& etc.)");
+        }
+
+        return errors;
+    };
+
     const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
+        const { name, value } = e.target;
+
+        setFormData({ ...formData, [name]: value });
+
+        // ✅ Password field ke liye live validation
+        if (name === "password") {
+            setPasswordErrors(validatePassword(value));
+        }
+
+        if (error) setError("");
     };
 
     const handleSubmit = async (e) => {
         e.preventDefault();
+        setError("");
+
+        // ✅ Password validation check
+        const pwdErrors = validatePassword(formData.password);
+        if (pwdErrors.length > 0) {
+            setPasswordErrors(pwdErrors);
+            setError("Please fix password requirements below");
+            return;
+        }
+
         setLoading(true);
 
         try {
-            const response = await axios.post(
-                `${import.meta.env.VITE_API_URL}/api/auth/business-signup`,
-                formData
-            );
+            const response = await api.post("/auth/business-signup", {
+                businessName: formData.businessName,
+                name: formData.name,
+                email: formData.email,
+                password: formData.password,
+            });
+
+            const { user, accessToken } = response.data.data;
+            useAuthStore.getState().setAuth(user, accessToken);
 
             toast.success("Business created successfully!");
-            navigate("/");
+            navigate("/dashboard");
         } catch (error) {
-            toast.error(error.response?.data?.message || "Signup failed");
+            console.error("Signup error:", error);
+
+            const errorMessage =
+                error.response?.data?.message ||
+                error.response?.data?.error ||
+                error.message ||
+                "Something went wrong";
+
+            setError(errorMessage);
+            toast.error(errorMessage);
         } finally {
             setLoading(false);
         }
@@ -43,6 +103,11 @@ const Signup = () => {
                 <h2 style={styles.title}>🏢 Create Your Business</h2>
                 <p style={styles.subtitle}>Start managing your bookings</p>
 
+                {/* ✅ Main error box */}
+                {error && (
+                    <div style={styles.errorBox}>❌ {error}</div>
+                )}
+
                 <form onSubmit={handleSubmit} style={styles.form}>
                     <input
                         type="text"
@@ -53,15 +118,17 @@ const Signup = () => {
                         style={styles.input}
                         required
                     />
+
                     <input
                         type="text"
-                        name="ownerName"
+                        name="name"
                         placeholder="Your Name (Owner)"
-                        value={formData.ownerName}
+                        value={formData.name}
                         onChange={handleChange}
                         style={styles.input}
                         required
                     />
+
                     <input
                         type="email"
                         name="email"
@@ -71,6 +138,7 @@ const Signup = () => {
                         style={styles.input}
                         required
                     />
+
                     <input
                         type="password"
                         name="password"
@@ -80,9 +148,35 @@ const Signup = () => {
                         style={styles.input}
                         required
                         minLength={8}
-                        pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&#^()_\-+=]).{8,}"
-                        title="Minimum 8 characters, 1 uppercase, 1 lowercase, 1 number, 1 special character"
                     />
+
+                    {/* ✅ Password requirements — live */}
+                    {formData.password && passwordErrors.length > 0 && (
+                        <div style={styles.passwordErrorBox}>
+                            <strong style={{ fontSize: "13px" }}>
+                                ⚠️ Password must have:
+                            </strong>
+                            <ul
+                                style={{
+                                    margin: "6px 0 0 0",
+                                    paddingLeft: "20px",
+                                    fontSize: "13px",
+                                    lineHeight: 1.5,
+                                }}
+                            >
+                                {passwordErrors.map((err, i) => (
+                                    <li key={i}>{err}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {/* ✅ Password requirements satisfied */}
+                    {formData.password && passwordErrors.length === 0 && (
+                        <div style={styles.passwordSuccessBox}>
+                            ✅ Password is strong
+                        </div>
+                    )}
 
                     <button
                         type="submit"
@@ -93,9 +187,9 @@ const Signup = () => {
                     </button>
                 </form>
 
-                <p style={styles.link}>
+                <p style={styles.linkText}>
                     Already have an account?{" "}
-                    <Link to="/" style={styles.linkText}>
+                    <Link to="/login" style={styles.link}>
                         Login
                     </Link>
                 </p>
@@ -106,61 +200,92 @@ const Signup = () => {
 
 const styles = {
     container: {
-        display: "flex",
-        justifyContent: "center",
-        alignItems: "center",
         minHeight: "100vh",
-        backgroundColor: "#f3f4f6",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        backgroundColor: "#f8fafc",
+        padding: "20px",
     },
     card: {
-        backgroundColor: "white",
+        backgroundColor: "#ffffff",
         padding: "40px",
         borderRadius: "12px",
-        boxShadow: "0 4px 20px rgba(0,0,0,0.1)",
-        maxWidth: "420px",
+        boxShadow: "0 4px 20px rgba(0,0,0,0.08)",
         width: "100%",
+        maxWidth: "440px",
     },
     title: {
-        textAlign: "center",
-        marginBottom: "8px",
+        fontSize: "24px",
+        fontWeight: "700",
         color: "#1e293b",
+        textAlign: "center",
+        margin: "0 0 8px 0",
     },
     subtitle: {
-        textAlign: "center",
-        color: "#6b7280",
-        marginBottom: "24px",
         fontSize: "14px",
+        color: "#64748b",
+        textAlign: "center",
+        margin: "0 0 24px 0",
+    },
+    errorBox: {
+        backgroundColor: "#fee2e2",
+        border: "1px solid #fecaca",
+        color: "#991b1b",
+        padding: "12px 16px",
+        borderRadius: "8px",
+        marginBottom: "16px",
+        fontSize: "14px",
+        fontWeight: "500",
+    },
+    passwordErrorBox: {
+        backgroundColor: "#fef2f2",
+        border: "1px solid #fecaca",
+        borderRadius: "8px",
+        padding: "10px 14px",
+        color: "#991b1b",
+    },
+    passwordSuccessBox: {
+        backgroundColor: "#d1fae5",
+        border: "1px solid #a7f3d0",
+        borderRadius: "8px",
+        padding: "8px 14px",
+        color: "#065f46",
+        fontSize: "13px",
+        fontWeight: "500",
     },
     form: {
         display: "flex",
         flexDirection: "column",
-        gap: "12px",
+        gap: "14px",
     },
     input: {
-        padding: "12px 16px",
-        borderRadius: "8px",
+        padding: "12px 14px",
         border: "1px solid #e2e8f0",
-        fontSize: "16px",
+        borderRadius: "8px",
+        fontSize: "14px",
         outline: "none",
+        backgroundColor: "#ffffff",
+        color: "#1e293b",
     },
     button: {
         padding: "12px",
         backgroundColor: "#4F46E5",
-        color: "white",
+        color: "#ffffff",
         border: "none",
         borderRadius: "8px",
-        fontSize: "16px",
+        fontSize: "15px",
         fontWeight: "600",
         cursor: "pointer",
         marginTop: "8px",
     },
-    link: {
+    linkText: {
         textAlign: "center",
         marginTop: "20px",
-        color: "#6b7280",
         fontSize: "14px",
+        color: "#64748b",
     },
-    linkText: {
+    link: {
         color: "#4F46E5",
         fontWeight: "600",
         textDecoration: "none",
