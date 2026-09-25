@@ -2,8 +2,7 @@ import { Router } from "express"
 import { auth } from "../middleware/authenticate.js"
 import { authorize } from "../middleware/authorize.js"
 // import {auth} from "../middleware/authenticate.js"
-import { createCalendar, getPublicCalendar, createPublicBooking , getCalendars} from "../controllers/calendarController.js"
-import { getAvailableSlots } from "../controllers/bookingController.js"
+import { createCalendar, getPublicCalendar, createPublicBooking , getCalendars ,getAvailableSlots } from "../controllers/calendarController.js"
 
 const router = Router()
 
