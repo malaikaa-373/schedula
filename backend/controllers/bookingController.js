@@ -18,10 +18,13 @@ const createBooking = async (req, res) => {
         const utcStartTime = toUTC(startTime)
         const utcEndTime = toUTC(endTime)
 
+        // ✅ Conflict check — cancelled skip karo + businessId filter
         const conflict = await Booking.findOne({
+            businessId: req.user.businessId,
             staffId: staffId,
             startTime: { $lt: utcEndTime },
-            endTime: { $gt: utcStartTime }
+            endTime: { $gt: utcStartTime },
+            status: { $ne: "cancelled" }
         })
 
         if (conflict) {
@@ -163,7 +166,9 @@ const rescheduleBooking = async (req, res) => {
             staffId: existingBooking.staffId,
             _id: { $ne: id },
             startTime: { $lt: endTime },
-            endTime: { $gt: startTime }
+            endTime: { $gt: startTime },
+            status: { $ne: "cancelled" }
+
         })
 
         if (conflict)
@@ -309,7 +314,7 @@ const cancelBooking = async (req, res) => {
             type: "booking_cancelled",
             message: `Booking cancelled for ${booking.clientName}`
         })
-        
+
         return res.status(200).json({
             success: true,
             message: "Booking cancelled successfully",

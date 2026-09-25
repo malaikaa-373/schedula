@@ -5,6 +5,7 @@ import { Service } from "../models/services.models.js"
 import { Booking } from "../models/booking.models.js"
 import { toUTC } from "../utils/timezone.js"
 import { io } from "../server.js";
+import { User } from "../models/user.models.js"
 
 const createCalendar = async (req, res) => {
     try {
@@ -50,14 +51,22 @@ const getPublicCalendar = async (req, res) => {
                 .json({ success: false, message: "This business is currently unavailable" })
         }
 
+        // Services fetch karo
         const services = await Service.find({ businessId: calendar.businessId })
+
+        // ✅ Staff bhi fetch karo
+        const staff = await User.find({
+            businessId: calendar.businessId,
+            role: "staff"
+        }).select("_id name email")
 
         return res
             .status(200)
             .json({
                 success: true,
                 designConfig: calendar.designConfig,
-                services: services
+                services: services,
+                staff: staff                // ✅ Staff add karo
             })
 
     } catch (error) {
@@ -152,13 +161,62 @@ const getAvailableSlots = async (req, res) => {
             });
         }
 
-        // 1. Staff ki working hours fetch karo
-        // 2. Service duration fetch karo
-        // 3. Existing bookings fetch karo
-        // 4. Available slots generate karo
-        // 5. Return available slots
+        // 1. Service fetch karo (duration ke liye)
+        const service = await Service.findById(serviceId);
+        if (!service) {
+            return res.status(404).json({ success: false, message: "Service not found" });
+        }
 
-        const availableSlots = []; // Logic yahan
+        // 2. Staff fetch karo (availability ke liye)
+        const staff = await User.findById(staffId);
+        if (!staff) {
+            return res.status(404).json({ success: false, message: "Staff not found" });
+        }
+
+        // 3. Us din ki existing bookings fetch karo
+        const startOfDay = new Date(date);
+        startOfDay.setHours(0, 0, 0, 0);
+        const endOfDay = new Date(date);
+        endOfDay.setHours(23, 59, 59, 999);
+
+        const existingBookings = await Booking.find({
+            staffId: staffId,
+            startTime: { $gte: startOfDay, $lte: endOfDay },
+            status: { $ne: "cancelled" }
+        });
+
+        // 4. Staff ki working hours lo (default 9 AM – 6 PM)
+        const workStart = 9;   // 9 AM
+        const workEnd = 18;    // 6 PM
+        const slotDuration = service.duration || 30;  // minutes
+
+        // 5. Available slots generate karo
+        const availableSlots = [];
+        const dateObj = new Date(date);
+
+        for (let hour = workStart; hour < workEnd; hour++) {
+            for (let min = 0; min < 60; min += slotDuration) {
+                const slotStart = new Date(dateObj);
+                slotStart.setHours(hour, min, 0, 0);
+
+                const slotEnd = new Date(slotStart);
+                slotEnd.setMinutes(slotEnd.getMinutes() + slotDuration);
+
+                // Check karo ke ye slot kisi existing booking se overlap to nahi karta
+                const hasConflict = existingBookings.some((b) => {
+                    const bStart = new Date(b.startTime);
+                    const bEnd = new Date(b.endTime);
+                    return slotStart < bEnd && slotEnd > bStart;
+                });
+
+                // Agar conflict nahi, to slot add karo
+                if (!hasConflict) {
+                    availableSlots.push(
+                        `${String(hour).padStart(2, "0")}:${String(min).padStart(2, "0")}`
+                    );
+                }
+            }
+        }
 
         return res.status(200).json({
             success: true,
