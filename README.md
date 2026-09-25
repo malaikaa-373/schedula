@@ -1,4 +1,4 @@
-# 🗓️ Schedula
+[# 🗓️ Schedula
 
 **A multi-tenant SaaS platform for booking, calendar, and task management.**
 
@@ -296,4 +296,4 @@ MIT — free to use, learn from, and build upon.
 
 ## 🙏 Acknowledgements
 
-Built as part of an internship project under the guidance of **Faraz Ahmad**.
+Built as part of an internship project under the guidance of **Faraz Ahmad**.](https://github.com/malaikaa-373/schedula/blob/main/README.md)
